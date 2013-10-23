@@ -27,14 +27,14 @@ public class ValueData implements Writable {
 	
 	public String getEventId(){return eventId;}
 	public String getTime(){return time;}
-	public int getMinutes() throws ParseException{
+	public int getSeconds() throws ParseException{
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 		Calendar cal = new GregorianCalendar();
 		Date date = sdf.parse(time);
 		cal.setTime(date);
 
-		return cal.get(Calendar.MINUTE) + cal.get(Calendar.HOUR_OF_DAY) * 60;
+		return cal.get(Calendar.SECOND) + cal.get(Calendar.MINUTE)*60 + cal.get(Calendar.HOUR_OF_DAY) * 60*60;
 	}
 
 	public void readFields(DataInput in) throws IOException {
@@ -52,6 +52,23 @@ public class ValueData implements Writable {
 		ValueData vd = new ValueData();
 		vd.readFields(in);
 		return vd;
+		
+	}
+	
+	public int compare(ValueData vd1, ValueData vd2){
+		
+		int vd1Minutes = 0;
+		int vd2Minutes = 0;
+		
+		try{
+			vd1Minutes = vd1.getSeconds();
+			vd2Minutes = vd2.getSeconds();
+		}catch(ParseException e){
+			
+			System.out.println(e.getMessage());
+			
+		}
+		return vd1Minutes < vd2Minutes ? -1  : vd1Minutes == vd2Minutes ? 0 : 1;
 		
 	}
 	

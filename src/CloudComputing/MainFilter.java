@@ -23,14 +23,12 @@ import org.apache.hadoop.mapreduce.Job;
 
 public class MainFilter {
 	
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 		
 		
 		
 		//JobConf conf = new JobConf(MainFilter.class);
 		//conf.setJobName("Filter");
-		Configuration config = HBaseConfiguration.create();
 		JobConf conf = new JobConf(MainFilter.class);
 		conf.setJobName("Filter");
 		
@@ -50,7 +48,6 @@ public class MainFilter {
 		FileInputFormat.setInputPaths(conf, new Path(args[0]));
 		FileOutputFormat.setOutputPath(conf, new Path(args[1]));
 		JobClient.runJob(conf);
-		//TableMapReduceUtil.initTableReducerJob("PhoneTimeOff", Reduce.class, new Job(conf) );
 		
 	
 		

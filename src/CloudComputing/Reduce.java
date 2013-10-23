@@ -3,9 +3,11 @@ package CloudComputing;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -29,71 +31,63 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
 		// replace KeyType with the real type of your key
-
 		//if its a network event
 	
 		//ligacao a BD
 		
-		//String st = key.getPhoneId() + " |" + key.getDate() + " |" + key.getCellId() + " |";
-		//SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-		//if(vd.getEventId().equals("4"))
-		//st += getMinutesOff(value);
+		
+		Configuration conf =  HBaseConfiguration.create();
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		
 		
 		if(key.getCellId().equals("")){
-			//inserir na tabela Network
-			Configuration conf =  HBaseConfiguration.create();
-			HBaseAdmin admin = new HBaseAdmin(conf);
 			HTable table = new HTable(conf,"PhoneTimeOff");
-			Put put = new Put(Bytes.toBytes("row1"));
-    		put.add(Bytes.toBytes("Family"), Bytes.toBytes("minutesOff"), Bytes.toBytes(String.valueOf(getMinutesOff(value))));
+			Put put = new Put(Bytes.toBytes(key.getPhoneId() +"_" +key.getDate()));
+    		put.add(Bytes.toBytes("NW"), Bytes.toBytes("secondsOff"), Bytes.toBytes(String.valueOf(getSecondsOff(value))));
     		table.put(put);
-    		System.out.println("It has been added biatch!!");
-    		//context.write(null, put);
-    		admin.close();
-    		output.collect(new LongWritable(0), new Text(String.valueOf(getMinutesOff(value))));
-    		System.out.println("It has been written biatch!!");
 
 
 		}else //inserir na cell id
 		
-		System.out.println("Not implemented dumbfuck!!");
-		//output.collect(new LongWritable(0), new Text(String.valueOf(getMinutesOff(value))));	
 		
+		admin.close();
+
 	}
 	
 	
-	public int getMinutesOff(Iterator<ValueData> valuesList){
-	
+	//public int getMinutesOff(Iterator<ValueData> valuesList){
+	public int getSecondsOff(Iterator<ValueData> valuesList){
+
 	if(!valuesList.hasNext())
 		return 0;
 	
-	int minutesOff = 0;
-	int prevM = 0;
-	int newM = 0;
-	int lastM = 1440;
+	int secondsOff = 0;
+	int prevS = 0;
+	int newS = 0;
+	int lastS = 1440;
 	ValueData vd = null;
 	while(valuesList.hasNext()){
 		 
 		vd = valuesList.next();
 
 		try {
-			newM = vd.getMinutes();
+			newS = vd.getSeconds();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 
 		if(vd.getEventId().equals("4")){
-			minutesOff += (newM - prevM);
-			prevM = newM;
-			System.out.println("newM: "+newM);
-			System.out.println("minutesOff: " + minutesOff);
-			System.out.println("Prev: " +prevM);
+			secondsOff += (newS - prevS);
+			prevS = newS;
+			System.out.println("newS: "+newS);
+			System.out.println("secondsOff: " + secondsOff);
+			System.out.println("Prev: " +prevS);
 			
 		}
 		else if(vd.getEventId().equals("5"))
 		{
 			
-			prevM = newM;
+			prevS = newS;
 			
 		}
 		else { 
@@ -103,6 +97,15 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		
 	}	
 		
-		return minutesOff;
+		return secondsOff;
 	}
+	
+
+	
+		
+		
+	
+	
 }
+	
+		
