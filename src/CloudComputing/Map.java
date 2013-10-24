@@ -33,10 +33,10 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 		if((option >= 2) && (option <= 5)) {
 			if(option == 4 || option == 5)
 			{
-				KeyData kd = new KeyData(tokens[4], tokens[1], "");
+				KeyData kd = new KeyData(tokens[4], tokens[1], "","MO"); //Minutes off
 				ValueData vd;
 				try {
-					vd = new ValueData(tokens[3], tokens[2]);
+					vd = new ValueData(tokens[3], tokens[2],"");
 					output.collect(kd, vd);
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -45,13 +45,15 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 			}//admitir que a saida de rede implica saida da cell id
 			else if (option == 2 || option == 3){
 				
-				KeyData kd = new KeyData(tokens[4], tokens[1], tokens[0]);
-				ValueData vd;
-				try {
-					vd = new ValueData(tokens[3], tokens[2]);
-					output.collect(kd, vd);
-				} catch (ParseException e) {
-					e.printStackTrace();
+				if(option == 2){
+					KeyData kd = new KeyData(tokens[4], tokens[1], "", "VC");//Visited Cells Family
+					ValueData vd;
+					try {
+						vd = new ValueData("", tokens[2], tokens[0]);
+						output.collect(kd, vd);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
 				}
 				
 			}

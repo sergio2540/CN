@@ -12,21 +12,28 @@ import java.util.GregorianCalendar;
 import org.apache.hadoop.io.Writable;
 
 
-public class ValueData implements Writable {
+public class ValueData implements Writable, Comparable<ValueData> {
 
 	private String eventId;
 	private String time;
+	private String cellId;
+	
+
 	public ValueData(){}
 	
-	public ValueData(String eventId, String time) throws ParseException{
+	public ValueData(String eventId, String time, String cellId) throws ParseException{
 		
 		this.eventId = eventId;
 		this.time = time;
+		this.cellId = cellId;
 	}
 	
-	
 	public String getEventId(){return eventId;}
+	
 	public String getTime(){return time;}
+	public String getCellId(){return cellId;}
+
+	
 	public int getSeconds() throws ParseException{
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
@@ -36,15 +43,28 @@ public class ValueData implements Writable {
 
 		return cal.get(Calendar.SECOND) + cal.get(Calendar.MINUTE)*60 + cal.get(Calendar.HOUR_OF_DAY) * 60*60;
 	}
+	
+	public int getMinutes() throws ParseException{
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		Calendar cal = new GregorianCalendar();
+		Date date = sdf.parse(time);
+		cal.setTime(date);
+
+		return cal.get(Calendar.MINUTE) + cal.get(Calendar.HOUR_OF_DAY) * 60;
+	}
+
 
 	public void readFields(DataInput in) throws IOException {
 		eventId = in.readUTF();
-		time = in.readUTF();				
+		time = in.readUTF();
+		cellId = in.readUTF();
 	}
 
 	public void write(DataOutput out) throws IOException {
 		out.writeUTF(eventId);
 		out.writeUTF(time);
+		out.writeUTF(cellId);
 		
 	}
 	
@@ -55,13 +75,13 @@ public class ValueData implements Writable {
 		
 	}
 	
-	public int compare(ValueData vd1, ValueData vd2){
+	public int compareTo(ValueData vd2){
 		
 		int vd1Minutes = 0;
 		int vd2Minutes = 0;
 		
 		try{
-			vd1Minutes = vd1.getSeconds();
+			vd1Minutes = this.getSeconds();
 			vd2Minutes = vd2.getSeconds();
 		}catch(ParseException e){
 			
