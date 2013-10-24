@@ -24,6 +24,8 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
+import CloudComputing.ValueData;
+
 
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 

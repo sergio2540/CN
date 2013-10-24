@@ -11,6 +11,8 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 
+import CloudComputing.ValueData;
+
 public class Map extends MapReduceBase implements Mapper<LongWritable, Text, KeyData, ValueData> {
 
 
