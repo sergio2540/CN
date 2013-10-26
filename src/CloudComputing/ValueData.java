@@ -11,7 +11,7 @@ import java.util.GregorianCalendar;
 
 import org.apache.hadoop.io.Writable;
 
-
+//so para commit
 public class ValueData implements Writable, Comparable<ValueData> {
 
 	private String eventId;

@@ -16,7 +16,8 @@ import CloudComputing.ValueData;
 public class Map extends MapReduceBase implements Mapper<LongWritable, Text, KeyData, ValueData> {
 
 
-	
+	//so para commit
+
 	public void map(LongWritable key, Text value, OutputCollector<KeyData, ValueData> output, Reporter reporter) throws IOException {
 		
 		
