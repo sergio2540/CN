@@ -31,7 +31,6 @@ import CloudComputing.ValueData;
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
 //public class Reduce extends TableReducer<KeyData, ValueData, ImmutableBytesWritable> {
-	//so para commit
 
 	
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
