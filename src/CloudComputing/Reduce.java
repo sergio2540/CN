@@ -36,15 +36,12 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
 		// replace KeyType with the real type of your key
 		//if its a network event
-	
 		//ligacao a BD
 		//List<ValueData> list = new ArrayList<ValueData>();
 		//while(value.hasNext())
 		//{
 			//list.add(value.next());
-			
 		//}
-		
 		//Collections.sort(list);
 		
 		Configuration conf =  HBaseConfiguration.create();
@@ -76,14 +73,18 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		}
 		else {
 			
-			List<Integer> list = getListOfHoursPresent(value);
-			String concat = "";
-			for(Integer intValue: list)
-				concat += (intValue.valueOf(intValue) + " ");
+			//List<Integer> list = getListOfHoursPresent(value);
+			//String concat = "";
+			//for(Integer intValue: list)
+				//concat += (intValue.valueOf(intValue) + " ");
 			
+			//HTable table = new HTable(conf,"phonePresence");
+			//Put put = new Put(Bytes.toBytes(key.getPhoneId() + "_" + key.getDate() + "_" + key.getCellId()));
+    		//put.add(Bytes.toBytes("PP"), Bytes.toBytes("presentHour"), Bytes.toBytes(concat));
+    		//table.put(put);
 			HTable table = new HTable(conf,"phonePresence");
-			Put put = new Put(Bytes.toBytes(key.getPhoneId() + "_" + key.getDate() + "_" + key.getCellId()));
-    		put.add(Bytes.toBytes("PP"), Bytes.toBytes("presentHour"), Bytes.toBytes(concat));
+			Put put = new Put(Bytes.toBytes(key.getCellId() + "_" + key.getDate() + "_" + horasemponto??));
+    		put.add(Bytes.toBytes("PP"), Bytes.toBytes("phonesPresent"), Bytes.toBytes(concat));
     		table.put(put);
 			
 		}

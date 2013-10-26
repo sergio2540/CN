@@ -17,21 +17,25 @@ public class ValueData implements Writable, Comparable<ValueData> {
 	private String eventId;
 	private String time;
 	private String cellId;
+	private String phoneId;
 	
 
 	public ValueData(){}
 	
-	public ValueData(String eventId, String time, String cellId) throws ParseException{
-		
+	public ValueData(String eventId, String time, String cellId, String phoneId) throws ParseException{
+    //public ValueData(String eventId, String time, String cellId) throws ParseException{
+
 		this.eventId = eventId;
 		this.time = time;
 		this.cellId = cellId;
+		this.phoneId = phoneId;
 	}
 	
 	public String getEventId(){return eventId;}
 	
 	public String getTime(){return time;}
 	public String getCellId(){return cellId;}
+	public String getPhoneId(){return phoneId;}
 
 	
 	public int getSeconds() throws ParseException{
@@ -59,12 +63,14 @@ public class ValueData implements Writable, Comparable<ValueData> {
 		eventId = in.readUTF();
 		time = in.readUTF();
 		cellId = in.readUTF();
+		phoneId = in.readUTF();
 	}
 
 	public void write(DataOutput out) throws IOException {
 		out.writeUTF(eventId);
 		out.writeUTF(time);
 		out.writeUTF(cellId);
+		out.writeUTF(phoneId);
 		
 	}
 	

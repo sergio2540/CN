@@ -32,11 +32,12 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 		int option = Integer.parseInt(tokens[3].trim());
 		if((option >= 2) && (option <= 5)) {
 			if(option == 4 || option == 5)
-			{
+			{							//phoneId date cellId typeDistinguisher
 				KeyData kd = new KeyData(tokens[4], tokens[1], "","MO"); //Minutes off
 				ValueData vd;
-				try {
-					vd = new ValueData(tokens[3], tokens[2],"");
+				try {				//eventId time cellId
+					//vd = new ValueData(tokens[3], tokens[2],"");
+					vd = new ValueData(tokens[3], tokens[2],"","");
 					output.collect(kd, vd);
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -45,22 +46,33 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 			}//admitir que a saida de rede implica saida da cell id
 			else if (option == 2 || option == 3){
 				
-				if(option == 2){
+				if(option == 2){	
+					//to get the visited cells
+					//phoneId date cellId typeDistinguisher
 					KeyData kd = new KeyData(tokens[4], tokens[1], "", "VC");//Visited Cells Family
 					ValueData vd;
-					try {
-						vd = new ValueData("", tokens[2], tokens[0]);
+					try {                //eventId time cellId
+						vd = new ValueData("", tokens[2], tokens[0],"");
 						output.collect(kd, vd);
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
 				}
-				
+				//to get the phones on a cell
+		////////////phoneId date cellId typeDistinguisher/////////////////////////////////////////////
+				KeyData kd = new KeyData("", tokens[1], tokens[0], "PP");//Visited Cells Family
+				ValueData vd;
+				try {                //eventId time cellId phone_id
+					vd = new ValueData(tokens[3], tokens[2], "",tokens[4]);
+					output.collect(kd, vd);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		} else {
 			System.out.println("event-id descartado: " + value);
 		}
 		
-		
+		////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 }
