@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="CN">
+    <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../Desktop/eclipse"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="CN.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/Hadoop/asm-3.2.jar"/>
+        <pathelement location="lib/Hadoop/aspectjrt-1.6.11.jar"/>
+        <pathelement location="lib/Hadoop/aspectjtools-1.6.11.jar"/>
+        <pathelement location="lib/Hadoop/commons-beanutils-1.7.0.jar"/>
+        <pathelement location="lib/Hadoop/commons-beanutils-core-1.8.0.jar"/>
+        <pathelement location="lib/Hadoop/commons-cli-1.2.jar"/>
+        <pathelement location="lib/Hadoop/commons-codec-1.4.jar"/>
+        <pathelement location="lib/Hadoop/commons-collections-3.2.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-configuration-1.6.jar"/>
+        <pathelement location="lib/Hadoop/commons-daemon-1.0.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-digester-1.8.jar"/>
+        <pathelement location="lib/Hadoop/commons-el-1.0.jar"/>
+        <pathelement location="lib/Hadoop/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-io-2.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-lang-2.4.jar"/>
+        <pathelement location="lib/Hadoop/commons-logging-1.1.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-logging-api-1.0.4.jar"/>
+        <pathelement location="lib/Hadoop/commons-math-2.1.jar"/>
+        <pathelement location="lib/Hadoop/commons-net-3.1.jar"/>
+        <pathelement location="lib/Hadoop/core-3.1.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-ant-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-capacity-scheduler-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-client-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-core-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-fairscheduler-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-minicluster-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-test-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-thriftfs-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hadoop-tools-1.2.1.jar"/>
+        <pathelement location="lib/Hadoop/hsqldb-1.8.0.10.jar"/>
+        <pathelement location="lib/Hadoop/jackson-core-asl-1.8.8.jar"/>
+        <pathelement location="lib/Hadoop/jackson-mapper-asl-1.8.8.jar"/>
+        <pathelement location="lib/Hadoop/jasper-compiler-5.5.12.jar"/>
+        <pathelement location="lib/Hadoop/jasper-runtime-5.5.12.jar"/>
+        <pathelement location="lib/Hadoop/jdeb-0.8.jar"/>
+        <pathelement location="lib/Hadoop/jersey-core-1.8.jar"/>
+        <pathelement location="lib/Hadoop/jersey-json-1.8.jar"/>
+        <pathelement location="lib/Hadoop/jersey-server-1.8.jar"/>
+        <pathelement location="lib/Hadoop/jets3t-0.6.1.jar"/>
+        <pathelement location="lib/Hadoop/jetty-6.1.26.jar"/>
+        <pathelement location="lib/Hadoop/jetty-util-6.1.26.jar"/>
+        <pathelement location="lib/Hadoop/jsch-0.1.42.jar"/>
+        <pathelement location="lib/Hadoop/junit-4.5.jar"/>
+        <pathelement location="lib/Hadoop/kfs-0.2.2.jar"/>
+        <pathelement location="lib/Hadoop/log4j-1.2.15.jar"/>
+        <pathelement location="lib/Hadoop/mockito-all-1.8.5.jar"/>
+        <pathelement location="lib/Hadoop/oro-2.0.8.jar"/>
+        <pathelement location="lib/Hadoop/servlet-api-2.5-20081211.jar"/>
+        <pathelement location="lib/Hadoop/slf4j-api-1.4.3.jar"/>
+        <pathelement location="lib/Hadoop/slf4j-log4j12-1.4.3.jar"/>
+        <pathelement location="lib/Hadoop/xmlenc-0.52.jar"/>
+        <pathelement location="lib/HBase/activation-1.1.jar"/>
+        <pathelement location="lib/HBase/asm-3.1.jar"/>
+        <pathelement location="lib/HBase/avro-1.5.3.jar"/>
+        <pathelement location="lib/HBase/avro-ipc-1.5.3.jar"/>
+        <pathelement location="lib/HBase/commons-beanutils-1.7.0.jar"/>
+        <pathelement location="lib/HBase/commons-beanutils-core-1.8.0.jar"/>
+        <pathelement location="lib/HBase/commons-cli-1.2.jar"/>
+        <pathelement location="lib/HBase/commons-codec-1.4.jar"/>
+        <pathelement location="lib/HBase/commons-collections-3.2.1.jar"/>
+        <pathelement location="lib/HBase/commons-configuration-1.6.jar"/>
+        <pathelement location="lib/HBase/commons-digester-1.8.jar"/>
+        <pathelement location="lib/HBase/commons-el-1.0.jar"/>
+        <pathelement location="lib/HBase/commons-httpclient-3.1.jar"/>
+        <pathelement location="lib/HBase/commons-io-2.1.jar"/>
+        <pathelement location="lib/HBase/commons-lang-2.5.jar"/>
+        <pathelement location="lib/HBase/commons-logging-1.1.1.jar"/>
+        <pathelement location="lib/HBase/commons-math-2.1.jar"/>
+        <pathelement location="lib/HBase/commons-net-1.4.1.jar"/>
+        <pathelement location="lib/HBase/core-3.1.1.jar"/>
+        <pathelement location="lib/HBase/guava-11.0.2.jar"/>
+        <pathelement location="lib/HBase/hadoop-core-1.0.4.jar"/>
+        <pathelement location="lib/HBase/hbase-0.94.12.jar"/>
+        <pathelement location="lib/HBase/high-scale-lib-1.1.1.jar"/>
+        <pathelement location="lib/HBase/httpclient-4.1.2.jar"/>
+        <pathelement location="lib/HBase/httpcore-4.1.3.jar"/>
+        <pathelement location="lib/HBase/jackson-core-asl-1.8.8.jar"/>
+        <pathelement location="lib/HBase/jackson-jaxrs-1.8.8.jar"/>
+        <pathelement location="lib/HBase/jackson-mapper-asl-1.8.8.jar"/>
+        <pathelement location="lib/HBase/jackson-xc-1.8.8.jar"/>
+        <pathelement location="lib/HBase/jamon-runtime-2.3.1.jar"/>
+        <pathelement location="lib/HBase/jasper-compiler-5.5.23.jar"/>
+        <pathelement location="lib/HBase/jasper-runtime-5.5.23.jar"/>
+        <pathelement location="lib/HBase/jaxb-api-2.1.jar"/>
+        <pathelement location="lib/HBase/jaxb-impl-2.2.3-1.jar"/>
+        <pathelement location="lib/HBase/jersey-core-1.8.jar"/>
+        <pathelement location="lib/HBase/jersey-json-1.8.jar"/>
+        <pathelement location="lib/HBase/jersey-server-1.8.jar"/>
+        <pathelement location="lib/HBase/jettison-1.1.jar"/>
+        <pathelement location="lib/HBase/jetty-6.1.26.jar"/>
+        <pathelement location="lib/HBase/jetty-util-6.1.26.jar"/>
+        <pathelement location="lib/HBase/jruby-complete-1.6.5.jar"/>
+        <pathelement location="lib/HBase/jsp-2.1-6.1.14.jar"/>
+        <pathelement location="lib/HBase/jsp-api-2.1-6.1.14.jar"/>
+        <pathelement location="lib/HBase/jsr305-1.3.9.jar"/>
+        <pathelement location="lib/HBase/junit-4.10-HBASE-1.jar"/>
+        <pathelement location="lib/HBase/libthrift-0.8.0.jar"/>
+        <pathelement location="lib/HBase/log4j-1.2.16.jar"/>
+        <pathelement location="lib/HBase/metrics-core-2.1.2.jar"/>
+        <pathelement location="lib/HBase/netty-3.2.4.Final.jar"/>
+        <pathelement location="lib/HBase/protobuf-java-2.4.0a.jar"/>
+        <pathelement location="lib/HBase/servlet-api-2.5-6.1.14.jar"/>
+        <pathelement location="lib/HBase/slf4j-api-1.4.3.jar"/>
+        <pathelement location="lib/HBase/slf4j-log4j12-1.4.3.jar"/>
+        <pathelement location="lib/HBase/snappy-java-1.0.3.2.jar"/>
+        <pathelement location="lib/HBase/stax-api-1.0.1.jar"/>
+        <pathelement location="lib/HBase/velocity-1.7.jar"/>
+        <pathelement location="lib/HBase/xmlenc-0.52.jar"/>
+        <pathelement location="lib/HBase/zookeeper-3.4.5.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <include name="CloudComputing/"/>
+                <exclude name="**/*.java"/>
+                <exclude name="External/"/>
+            </fileset>
+        </copy>
+		<exec executable="/bin/bash">
+		<arg value = "scripts/hbase.sh"/>
+		</exec>
+    </target>
+
+
+
+    <target name="clean">
+        <delete dir="bin"/>
+        <delete dir="./output" />
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <include name="CloudComputing/"/>
+            <exclude name="External/"/>
+            <classpath refid="CN.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+    <target name="CN">
+        <java classname="CloudComputing.MainFilter" failonerror="true" fork="yes">
+            <arg line="input output"/>
+            <classpath refid="CN.classpath"/>
+        </java>
+    </target>
+</project>

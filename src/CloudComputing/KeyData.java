@@ -19,14 +19,12 @@ public class KeyData implements WritableComparable<KeyData> {
 		this.date = date;
 		this.cellId = cellId;	
 		this.typeDistinguisher = typeDistinguisher;
-		
 	}
 	
 	public String getPhoneId(){return phoneId;}
 	public String getDate(){return date;}
 	public String getCellId(){return cellId;}
 	public String getTypeDistinguisher(){return typeDistinguisher;}
-
 	
 	@Override
 	public void readFields(DataInput in) throws IOException {
@@ -34,7 +32,6 @@ public class KeyData implements WritableComparable<KeyData> {
 		date = in.readUTF();
 		cellId = in.readUTF();
 		typeDistinguisher = in.readUTF();
-		
 	}
 
 	@Override
@@ -43,15 +40,11 @@ public class KeyData implements WritableComparable<KeyData> {
 		out.writeUTF(date);
 		out.writeUTF(cellId);
 		out.writeUTF(typeDistinguisher);
-		
 	}
 
 	public int compareTo(KeyData key) {
-
 		String total = phoneId + date + cellId + typeDistinguisher;
-		//System.out.println(total + " == " + key.phoneId + key.date + key.cellId + key.typeDistinguisher);
 		return total.compareTo(key.phoneId + key.date + key.cellId + key.typeDistinguisher); 
-		
 	}
 
 }
