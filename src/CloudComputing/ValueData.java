@@ -16,25 +16,25 @@ public class ValueData implements Writable, Comparable<ValueData> {
 	private String eventId;
 	private String time;
 	private String cellId;
-	private String phoneId;
+	//private String phoneId;
 	
 
 	public ValueData(){}
 	
-	public ValueData(String eventId, String time, String cellId, String phoneId) throws ParseException{
-    //public ValueData(String eventId, String time, String cellId) throws ParseException{
+	//public ValueData(String eventId, String time, String cellId, String phoneId) throws ParseException{
+    public ValueData(String eventId, String time, String cellId) throws ParseException{
 
 		this.eventId = eventId;
 		this.time = time;
 		this.cellId = cellId;
-		this.phoneId = phoneId;
+		//this.phoneId = phoneId;
 	}
 	
 	public String getEventId(){return eventId;}
 	
 	public String getTime(){return time;}
 	public String getCellId(){return cellId;}
-	public String getPhoneId(){return phoneId;}
+	//public String getPhoneId(){return phoneId;}
 
 	
 	public int getSeconds() throws ParseException{
@@ -62,14 +62,14 @@ public class ValueData implements Writable, Comparable<ValueData> {
 		eventId = in.readUTF();
 		time = in.readUTF();
 		cellId = in.readUTF();
-		phoneId = in.readUTF();
+		//phoneId = in.readUTF();
 	}
 
 	public void write(DataOutput out) throws IOException {
 		out.writeUTF(eventId);
 		out.writeUTF(time);
 		out.writeUTF(cellId);
-		out.writeUTF(phoneId);
+		//out.writeUTF(phoneId);
 		
 	}
 	
@@ -82,18 +82,25 @@ public class ValueData implements Writable, Comparable<ValueData> {
 	
 	public int compareTo(ValueData vd2){
 		
-		int vd1Minutes = 0;
-		int vd2Minutes = 0;
+		int vd1Seconds = 0;
+		int vd2Seconds = 0;
 		
 		try{
-			vd1Minutes = this.getSeconds();
-			vd2Minutes = vd2.getSeconds();
+			vd1Seconds = this.getSeconds();
+			vd2Seconds = vd2.getSeconds();
 		}catch(ParseException e){
 			
 			System.out.println(e.getMessage());
 			
 		}
-		return vd1Minutes < vd2Minutes ? -1  : vd1Minutes == vd2Minutes ? 0 : 1;
+		
+		if(vd1Seconds < vd2Seconds) {
+				return -1;
+		} else if(vd1Seconds == vd2Seconds) {
+			return 0;
+		} else {
+			return 1;	
+		}
 		
 	}
 	

@@ -36,8 +36,8 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 				KeyData kd = new KeyData(tokens[4], tokens[1], "","MO"); //Minutes off
 				ValueData vd;
 				try {				//eventId time cellId
-					//vd = new ValueData(tokens[3], tokens[2],"");
-					vd = new ValueData(tokens[3], tokens[2],"","");
+					vd = new ValueData(tokens[3], tokens[2],"");
+					//vd = new ValueData(tokens[3], tokens[2],"","");
 					output.collect(kd, vd);
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -52,27 +52,28 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 					KeyData kd = new KeyData(tokens[4], tokens[1], "", "VC");//Visited Cells Family
 					ValueData vd;
 					try {                //eventId time cellId
-						vd = new ValueData("", tokens[2], tokens[0],"");
+						vd = new ValueData("", tokens[2], tokens[0]);
 						output.collect(kd, vd);
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
 				}
-				//to get the phones on a cell
-		////////////phoneId date cellId typeDistinguisher/////////////////////////////////////////////
-				KeyData kd = new KeyData("", tokens[1], tokens[0], "PP");//Visited Cells Family
+				
+				//<phoneId date cellId>  <time eventId>
+				
+				KeyData kd = new KeyData(tokens[4], tokens[1], tokens[0], "PP");//Visited Cells Family
 				ValueData vd;
-				try {                //eventId time cellId phone_id
-					vd = new ValueData(tokens[3], tokens[2], "",tokens[4]);
+				try {                //eventId time cellId 
+					vd = new ValueData(tokens[3], tokens[2], "");
 					output.collect(kd, vd);
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
+		
 			}
 		} else {
 			System.out.println("event-id descartado: " + value);
 		}
 		
-		////////////////////////////////////////////////////////////////////////////////////////////////////
 	}
 }

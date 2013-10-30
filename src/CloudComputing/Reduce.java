@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
@@ -34,15 +35,36 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 	
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
-		// replace KeyType with the real type of your key
-		//if its a network event
-		//ligacao a BD
-		//List<ValueData> list = new ArrayList<ValueData>();
-		//while(value.hasNext())
-		//{
-			//list.add(value.next());
-		//}
-		//Collections.sort(list);
+		
+		List<ValueData> sortedVd = new ArrayList<ValueData>();
+		
+
+		while(value.hasNext())
+		{
+
+
+//			String eventId, String time, String cellId
+			ValueData temp = value.next();
+			
+			ValueData vd;
+			try {
+				
+				vd = new ValueData(temp.getEventId(), temp.getTime(), temp.getCellId());
+				System.out.println("Family1: " + key.getTypeDistinguisher() + " Cell: " + vd.getCellId() + " Event: " + vd.getEventId() + " Time: " + vd.getTime());
+				sortedVd.add(vd);
+				
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		Collections.sort(sortedVd);
+		
+		for(ValueData _vd : sortedVd) {
+			System.out.println("Family2: " + key.getTypeDistinguisher() + " Cell: " +_vd.getCellId() + " Event: " +_vd.getEventId() + " Time: " +_vd.getTime());
+		}
+		
+		Iterator<ValueData> sortedVdIterator = sortedVd.iterator();
 		
 		Configuration conf =  HBaseConfiguration.create();
 		HBaseAdmin admin = new HBaseAdmin(conf);
@@ -54,8 +76,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			HTable table = new HTable(conf,"Cell");
 			Put put = new Put(Bytes.toBytes(key.getPhoneId() +"_" +key.getDate()));
 			
-			
-			String cellSequence = getCellSequence(value);
+			String cellSequence = getCellSequence(sortedVdIterator);
 			
     		put.add(Bytes.toBytes(key.getTypeDistinguisher()), Bytes.toBytes("cellSequence"), Bytes.toBytes(cellSequence));
     		
@@ -66,27 +87,20 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			
 			HTable table = new HTable(conf,"Cell");
 			Put put = new Put(Bytes.toBytes(key.getPhoneId() +"_" +key.getDate()));
-    		put.add(Bytes.toBytes(key.getTypeDistinguisher()), Bytes.toBytes("secondsOff"), Bytes.toBytes(String.valueOf(getSecondsOff(value))));
+    		put.add(Bytes.toBytes(key.getTypeDistinguisher()), Bytes.toBytes("secondsOff"), Bytes.toBytes(String.valueOf(getSecondsOff(sortedVdIterator))));
     		table.put(put);
 			
 			
 		}
-		else {
-			
-			//List<Integer> list = getListOfHoursPresent(value);
-			//String concat = "";
-			//for(Integer intValue: list)
-				//concat += (intValue.valueOf(intValue) + " ");
-			
-			//HTable table = new HTable(conf,"phonePresence");
-			//Put put = new Put(Bytes.toBytes(key.getPhoneId() + "_" + key.getDate() + "_" + key.getCellId()));
-    		//put.add(Bytes.toBytes("PP"), Bytes.toBytes("presentHour"), Bytes.toBytes(concat));
-    		//table.put(put);
+		else if (key.getTypeDistinguisher().equals("PP")) {
 			HTable table = new HTable(conf,"phonePresence");
-			Put put = new Put(Bytes.toBytes(key.getCellId() + "_" + key.getDate() + "_" + horasemponto??));
-    		put.add(Bytes.toBytes("PP"), Bytes.toBytes("phonesPresent"), Bytes.toBytes(concat));
-    		table.put(put);
-			
+			List<Integer> list = getListOfHoursPresent(sortedVdIterator);
+			for(Integer intValue: list){
+				//System.out.println(key.getPhoneId() + " was on at " + intValue.toString());
+				Append append = new Append((key.getCellId() + "_" + key.getDate() + "_" + intValue.toString()).getBytes());
+				append.add("PP".getBytes(), "phoneList".getBytes(),(key.getPhoneId() + " ").getBytes());
+				table.append(append);
+			}		
 		}
 		
 		admin.close();
@@ -99,7 +113,6 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		ValueData vd;
 		
 		while(valuesList.hasNext()){
-			
 			vd = valuesList.next();
 			sequence.append(vd.getCellId());
 			sequence.append(" ");
@@ -137,7 +150,6 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		while(valuesList.hasNext()) {
 			
 			vd = valuesList.next();
-			
 			if(vd.getEventId().equals("2")){
 				
 				try {
@@ -219,7 +231,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		while(temp1 <= temp2) {
 			if((temp1 % (60*60)) == 0){
 				z = 60*60; 
-				presentInstants.add(temp1);
+				presentInstants.add(temp1/(60*60));
 				
 			}
 			temp1 += z;
@@ -253,9 +265,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		if(vd.getEventId().equals("4")){
 			secondsOff += (newS - prevS);
 			prevS = newS;
-			System.out.println("newS: "+newS);
-			System.out.println("secondsOff: " + secondsOff);
-			System.out.println("Prev: " +prevS);
+			//System.out.println("newS: "+newS);
+			//System.out.println("secondsOff: " + secondsOff);
+			//System.out.println("Prev: " +prevS);
 			
 		}
 		else if(vd.getEventId().equals("5"))
