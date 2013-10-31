@@ -19,7 +19,7 @@ public class ValueData implements Writable, Comparable<ValueData> {
 
 	public ValueData(){}
 	
-    public ValueData(String eventId, String time, String cellId) throws ParseException{
+    public ValueData(String eventId, String time, String cellId){
 		this.eventId = eventId;
 		this.time = time;
 		this.cellId = cellId;
@@ -29,18 +29,22 @@ public class ValueData implements Writable, Comparable<ValueData> {
 	public String getTime(){return time;}
 	public String getCellId(){return cellId;}
 	
-	public int getSeconds() throws ParseException{
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-		Calendar cal = new GregorianCalendar();
-		Date date = sdf.parse(time);
-		cal.setTime(date);
-		return cal.get(Calendar.SECOND) + cal.get(Calendar.MINUTE)*60 + cal.get(Calendar.HOUR_OF_DAY) * 60*60;
+	public int getSeconds() {
+		return getMinutes()*60;
 	}
 	
-	public int getMinutes() throws ParseException{
+	public int getMinutes(){
 		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 		Calendar cal = new GregorianCalendar();
-		Date date = sdf.parse(time);
+		
+		Date date = null;
+		try {
+			date = sdf.parse(time);
+		} catch (ParseException e) {
+			System.out.println("Expected format: HH:MM:SS.");
+			System.out.println("Founded: " + time);
+			System.out.println("Message: " + e.getMessage());
+		}
 		cal.setTime(date);
 		return cal.get(Calendar.MINUTE) + cal.get(Calendar.HOUR_OF_DAY) * 60;
 	}
@@ -66,12 +70,10 @@ public class ValueData implements Writable, Comparable<ValueData> {
 	public int compareTo(ValueData vd2){
 		int vd1Seconds = 0;
 		int vd2Seconds = 0;
-		try {
-			vd1Seconds = this.getSeconds();
-			vd2Seconds = vd2.getSeconds();
-		} catch(ParseException e){
-			System.out.println(e.getMessage());
-		}
+		
+		vd1Seconds = this.getSeconds();
+		vd2Seconds = vd2.getSeconds();
+		
 		
 		if(vd1Seconds < vd2Seconds) {
 			return -1;

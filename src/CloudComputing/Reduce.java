@@ -1,7 +1,6 @@
 package CloudComputing;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,6 +8,8 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
@@ -23,6 +24,23 @@ import org.apache.hadoop.mapred.Reporter;
 
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
+	private HBaseAdmin admin;
+	private HTable table;
+	
+	public void setup(String tableName) throws IOException{
+		
+		Configuration conf =  HBaseConfiguration.create();
+		this.admin = new HBaseAdmin(conf);
+		this.table = new HTable(conf, tableName);
+		
+	}
+	
+	public void cleanUp() throws IOException{
+		
+		this.admin.close();
+		this.table.close();
+	}
+	
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
 		
 		List<ValueData> sortedVd = new ArrayList<ValueData>();
@@ -31,60 +49,52 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			
 			ValueData temp = value.next();
 			
-			ValueData vd;
-			try {
-				
-				vd = new ValueData(temp.getEventId(), temp.getTime(), temp.getCellId());
-				System.out.println("Family1: " + key.getTypeDistinguisher() + " Cell: " + vd.getCellId() + " Event: " + vd.getEventId() + " Time: " + vd.getTime());
-				sortedVd.add(vd);
-				
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+			ValueData vd = new ValueData(temp.getEventId(), temp.getTime(), temp.getCellId());
+			System.out.println("Family1: " + key.getTypeDistinguisher() + " Cell: " + vd.getCellId() + " Event: " + vd.getEventId() + " Time: " + vd.getTime());
+			sortedVd.add(vd);
 		}
 		
 		Collections.sort(sortedVd);
-		
-		for(ValueData _vd : sortedVd) {
-			System.out.println("Family2: " + key.getTypeDistinguisher() + " Cell: " +_vd.getCellId() + " Event: " +_vd.getEventId() + " Time: " +_vd.getTime());
-		}
-		
 		Iterator<ValueData> sortedVdIterator = sortedVd.iterator();
 		
-		Configuration conf =  HBaseConfiguration.create();
-		HBaseAdmin admin = new HBaseAdmin(conf);
 		
 		String typeDistinguisher = key.getTypeDistinguisher();
-		
+		//addToTable(String tableName, String row, String family, String  qualifier, String value)
 		if(typeDistinguisher.equals("VC")){
 			
-			HTable table = new HTable(conf,"Cell");
-			Put put = new Put(Bytes.toBytes(key.getPhoneId() +"_" +key.getDate()));
-			String cellSequence = getCellSequence(sortedVdIterator);
-    		put.add(Bytes.toBytes(key.getTypeDistinguisher()), Bytes.toBytes("cellSequence"), Bytes.toBytes(cellSequence));
-    		table.put(put);
-    		table.close();
+			String cellSequence = getCellSequence(sortedVdIterator);			
+				try {
+					setup("Cell");
+					putToTable(key.getPhoneId() +"_" +key.getDate() ,"VC", "cellSequence", cellSequence);
+					cleanUp();
+				} catch (Exception e) {
+					System.out.println("Error while adding to table Cell, VC family");
+					System.out.println("Message: " + e.getMessage());
+				}
 
 		} else if (typeDistinguisher.equals("MO")){
-			
-			HTable table = new HTable(conf,"Cell");
-			Put put = new Put(Bytes.toBytes(key.getPhoneId() +"_" +key.getDate()));
-    		put.add(Bytes.toBytes(key.getTypeDistinguisher()), Bytes.toBytes("minutesOff"), Bytes.toBytes(String.valueOf(getMinutesOff(sortedVdIterator))));
-    		table.put(put);
-    		table.close();
-			
+
+				
+				try {
+					setup("Cell");
+					putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
+					cleanUp();
+				} catch (Exception e) {
+					System.out.println("Error while adding to table Cell, MO family");
+					System.out.println("Message: " + e.getMessage());
+				}
 		} else if (typeDistinguisher.equals("PP")) {
-			
-			HTable table = new HTable(conf,"phonePresence");
 			List<Integer> list = getListOfHoursPresent(sortedVdIterator);
-			for(Integer intValue: list){
-				Append append = new Append((key.getCellId() + "_" + key.getDate() + "_" + intValue.toString()).getBytes());
-				append.add("PP".getBytes(), "phoneList".getBytes(),(key.getPhoneId() + " ").getBytes());
-				table.append(append);
-			}
-			table.close();
+					try {
+						setup("phonePresence");
+						appendToTable(list,key.getCellId() + "_" + key.getDate() + "_" ,"PP", "phoneList", key.getPhoneId() + " ");
+						cleanUp();
+					} catch (Exception e) {
+						System.out.println("Error while adding to table phonePresence, PP family");
+						System.out.println("Message: " + e.getMessage());
+					}
+			
 		}
-		admin.close();
 	}
 	
 	public String getCellSequence(Iterator<ValueData> valuesList){
@@ -120,9 +130,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			
 			vd = valuesList.next();
 			if(vd.getEventId().equals("2")){
-				
-				try {
-					
+			
 					if(!hasProcessedOne) {
 						hasProcessedOne = true;
 						firstEvent = 2;
@@ -130,14 +138,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 					
 					hour1 = vd.getSeconds();
 
-					
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-
 			} else if(vd.getEventId().equals("3")) {
 				
-				try {
+				
 
 					hour2 = vd.getSeconds();
 					
@@ -150,10 +153,6 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 						hasProcessedOne = false;
 						continue;
 					}
-					
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
 			}
 
 			if(hasProcessedTwo) {
@@ -211,11 +210,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			 
 			vd = valuesList.next();
 	
-			try {
 				newS = vd.getSeconds();
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
 	
 			if(vd.getEventId().equals("4")){
 				secondsOff += (newS - prevS);
@@ -223,7 +218,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			} else if(vd.getEventId().equals("5")){
 				prevS = newS;
 			} else { 
-				System.out.println("ERROR!!!!");
+				System.out.println("Seconds off deals only with events 4 or 5");
 				return 0;
 			}
 		}	
@@ -232,6 +227,31 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		
 	}
 
+	
+	public void putToTable(String row, String family, String  qualifier, String value) throws Exception{
+				
+			Put put = new Put(row.getBytes());
+			put.add(family.getBytes(), qualifier.getBytes(), value.getBytes());
+			this.table.put(put);	
+
+	}
+	
+	
+public void appendToTable(List<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+
+			List<Append> batch = new ArrayList<Append>();
+
+			for(Integer temp : list)
+			{
+				Append append = new Append((row + String.valueOf(temp)).getBytes());
+				append.add(family.getBytes(), qualifier.getBytes(),(value + " ").getBytes());	
+				batch.add(append);
+			}
+			this.table.batch(batch);
+			//check if null
+		
+	}
+	
 }
 	
 		
