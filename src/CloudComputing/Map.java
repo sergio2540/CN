@@ -74,6 +74,16 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 				 								//eventId time cellId 
 				ValueData vd = new ValueData(tokens[3], tokens[2], "");
 				output.collect(kd, vd);
+			} else if(option.equals("8")){
+				
+				
+					
+					KeyData kd = new KeyData(tokens[4], tokens[1], tokens[0], "PP"); //Phone Presence Family
+					 								//eventId time cellId 
+					ValueData vd = new ValueData(tokens[3], tokens[2], "");
+					output.collect(kd, vd);
+					
+					
 			}
 		 else {
 			System.out.println("Event-id droped: " + value);

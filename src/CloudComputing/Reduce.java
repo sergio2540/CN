@@ -2,19 +2,19 @@ package CloudComputing;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.MasterNotRunningException;
-import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -84,7 +84,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 					System.out.println("Message: " + e.getMessage());
 				}
 		} else if (typeDistinguisher.equals("PP")) {
-			List<Integer> list = getListOfHoursPresent(sortedVdIterator);
+			Set<Integer> list = getListOfHoursPresent(sortedVdIterator);
 					try {
 						setup("phonePresence");
 						appendToTable(list,key.getCellId() + "_" + key.getDate() + "_" ,"PP", "phoneList", key.getPhoneId() + " ");
@@ -107,10 +107,12 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			sequence.append(vd.getCellId());
 			sequence.append(" ");
 		}
+		
 		return sequence.toString();
 	}
 	
-	public List<Integer> getListOfHoursPresent(Iterator<ValueData> valuesList) {
+	//Query 2
+	public Set<Integer> getListOfHoursPresent(Iterator<ValueData> valuesList) {
 		
 		ValueData vd;
 		
@@ -120,8 +122,11 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		boolean hasProcessedOne = false;
 		boolean hasProcessedTwo = false;
 		int firstEvent = 0;
-		List<Integer> presentInstants = new ArrayList<Integer>();
+		
+		Set<Integer> presentInstants = new HashSet<Integer>();
+		
 		String eventId = null;
+		
 				
 		if(!valuesList.hasNext()) {
 			return null;
@@ -130,8 +135,16 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		while(valuesList.hasNext()) {
 			
 			vd = valuesList.next();
+			
 			eventId = vd.getEventId();
-			if(eventId.equals("2") || eventId.equals("4")){
+		
+			if(eventId.equals("8")){
+				
+				int hour = vd.getSeconds() / (60*60);
+				presentInstants.add(hour);
+
+			
+			} else if(eventId.equals("2") || eventId.equals("4")){
 			
 					if(!hasProcessedOne) {
 						hasProcessedOne = true;
@@ -176,7 +189,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		return presentInstants;
 	}
 	
-	private void addElementTocreateList(List<Integer> presentInstants, int time1, int time2) {
+	private void addElementTocreateList(Set<Integer> presentInstants, int time1, int time2) {
 		
 		int z = 1;
 		int temp1 = 0;
@@ -193,6 +206,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			temp1 += z;
 		}		
 	}
+	
+	
+	//Query 3
 	
 	public int getMinutesOff(Iterator<ValueData> valuesList) {
 		return getSecondsOff(valuesList) / 60;
@@ -239,7 +255,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	}
 	
 	
-public void appendToTable(List<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
 
 			List<Append> batch = new ArrayList<Append>();
 
