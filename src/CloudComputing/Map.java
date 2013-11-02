@@ -32,11 +32,30 @@ public class Map extends MapReduceBase implements Mapper<LongWritable, Text, Key
 	
 			//Join/Leave Network
 			if(option.equals("4") || option.equals("5"))
-			{						    //phoneId date cellId typeDistinguisher
-				KeyData kd = new KeyData(tokens[4], tokens[1], "","MO"); //Minutes off
-											//eventId time cellId
-				ValueData vd = new ValueData(tokens[3], tokens[2],"");
+			{	
+				//Query1
+				if(option.equals("4")){	
+	                   //phoneId date cellId typeDistinguisher
+					KeyData kd = new KeyData(tokens[4], tokens[1], "", "VC"); //Visited Cells Family
+					ValueData vd;
+								//eventId time cellId
+					vd = new ValueData("", tokens[2], tokens[0]);
+					output.collect(kd, vd);
+					
+				}
+				//Query2
+				KeyData kd = new KeyData(tokens[4], tokens[1], tokens[0], "PP"); //Phone Presence Family
+					//eventId time cellId 
+				ValueData vd = new ValueData(tokens[3], tokens[2], "");
 				output.collect(kd, vd);
+				
+				//Query3
+				//phoneId date cellId typeDistinguisher
+				kd = new KeyData(tokens[4], tokens[1], "","MO"); //Minutes off
+											//eventId time cellId
+				vd = new ValueData(tokens[3], tokens[2],"");
+				output.collect(kd, vd);
+		
 				
 				            //Join/Leave cell
 			} else if(option.equals("2") || option.equals("3"))

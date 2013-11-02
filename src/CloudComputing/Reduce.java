@@ -121,6 +121,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		boolean hasProcessedTwo = false;
 		int firstEvent = 0;
 		List<Integer> presentInstants = new ArrayList<Integer>();
+		String eventId = null;
 				
 		if(!valuesList.hasNext()) {
 			return null;
@@ -129,7 +130,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		while(valuesList.hasNext()) {
 			
 			vd = valuesList.next();
-			if(vd.getEventId().equals("2")){
+			eventId = vd.getEventId();
+			if(eventId.equals("2") || eventId.equals("4")){
 			
 					if(!hasProcessedOne) {
 						hasProcessedOne = true;
@@ -138,7 +140,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 					
 					hour1 = vd.getSeconds();
 
-			} else if(vd.getEventId().equals("3")) {
+			} else if(eventId.equals("3") || eventId.equals("5")) {
 				
 				
 
