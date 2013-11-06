@@ -19,6 +19,7 @@ public class MainFilter {
 		
 		conf.setMapperClass(Map.class);
 		conf.setReducerClass(Reduce.class);
+		conf.setCombinerClass(Combine.class);
 		
 		conf.setInputFormat(TextInputFormat.class);
 		conf.setOutputFormat(TextOutputFormat.class);

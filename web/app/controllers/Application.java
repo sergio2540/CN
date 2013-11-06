@@ -99,6 +99,10 @@ public class Application extends Controller {
 			Get g = new Get(Bytes.toBytes(key));
 	
 			org.apache.hadoop.hbase.client.Result r = table.get(g);
+			
+			if(r.isEmpty()){
+				return ok("0");
+			}
 		
 			String family = "MO";
 			String qualifier = "minutesOff";

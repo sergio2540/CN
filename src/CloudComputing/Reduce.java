@@ -45,6 +45,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		
 		List<ValueData> sortedVd = new ArrayList<ValueData>();
 
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<reduce time started>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
+
+		
 		while(value.hasNext()){
 			
 			ValueData temp = value.next();
@@ -56,7 +59,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		
 		Collections.sort(sortedVd);
 		Iterator<ValueData> sortedVdIterator = sortedVd.iterator();
-		
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<reduce time finished>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
+
 		
 		String typeDistinguisher = key.getTypeDistinguisher();
 		//addToTable(String tableName, String row, String family, String  qualifier, String value)
@@ -181,10 +185,10 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		}
 		
 // Caso se queira contar ate as 24h
-//		if(hasProcessedOne) {
-//			hour2 = 24*60*60 - 1;
-//			addElementTocreateList(presentInstants, hour1, hour2);
-//		}
+		if(hasProcessedOne) {
+			hour2 = 24*60*60 - 1;
+			addElementTocreateList(presentInstants, hour1, hour2);
+		}
 		
 		return presentInstants;
 	}
@@ -235,11 +239,14 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 				prevS = newS;			
 			} else if(vd.getEventId().equals("5")){
 				prevS = newS;
-			} else { 
-				System.out.println("Seconds off deals only with events 4 or 5");
-				return 0;
+			} else if(vd.getEventId().equals("8"))  {
+				continue;
 			}
-		}	
+		}
+		
+		if(vd.getEventId().equals("5")) {
+			secondsOff += 86400 - prevS;
+		}
 		
 		return secondsOff;
 		
@@ -267,7 +274,6 @@ public void appendToTable(Collection<Integer> list ,String row, String family, S
 			}
 			this.table.batch(batch);
 			//check if null
-		
 	}
 	
 }

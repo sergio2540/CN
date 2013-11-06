@@ -10,6 +10,7 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
+    <property name="javaPlay" location="ResourceApps/play-2.2.0/play"/>
     <path id="CN.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/Hadoop/asm-3.2.jar"/>
@@ -122,13 +123,13 @@
         <pathelement location="lib/HBase/xmlenc-0.52.jar"/>
         <pathelement location="lib/HBase/zookeeper-3.4.5.jar"/>
     </path>
+	
     <target name="init">
         <mkdir dir="bin"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
                 <include name="CloudComputing/"/>
                 <exclude name="**/*.java"/>
-                <exclude name="External/"/>
             </fileset>
         </copy>
 		<exec executable="/bin/bash">
@@ -136,25 +137,25 @@
 		</exec>
     </target>
 
-
+	<target name="getResources">
+        	<get dest="./Resources.zip" src="https://dl.dropboxusercontent.com/u/12590235/Resources.zip"/>
+		<unzip src="Resources.zip" dest="."/>
+    	</target>
 
     <target name="clean">
         <delete dir="bin"/>
         <delete dir="./output" />
     </target>
-    <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
+	
+    <target name="build" depends="init">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
             <include name="CloudComputing/"/>
-            <exclude name="External/"/>
             <classpath refid="CN.classpath"/>
         </javac>
     </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+	
     <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
         <copy todir="${ant.library.dir}">
             <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
@@ -168,10 +169,14 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="CN">
+	
+    <target name="run" depends="clean,build">
         <java classname="CloudComputing.MainFilter" failonerror="true" fork="yes">
             <arg line="input output"/>
             <classpath refid="CN.classpath"/>
         </java>
+	<exec executable="${javaPlay}" dir="web">
+		<arg value="start"/>		
+	</exec>
     </target>
 </project>
