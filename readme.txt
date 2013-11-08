@@ -1,27 +1,33 @@
 Material usado?
 
-Play java 2.2.1
+Play 2.2.1 (Java)
 Hadoop 1.2.1
 Hbase 0.94.12
 
-Como correr?(Linux)
+Como correr? 
+(Linux)
 colocar pasta CN em Desktop
 ant getResources
 ant run
 
 Que consiste em:
+
+ant getResources 
+1. Download de todo o material necessario, cerca 287 MB, para o seu computador (hadoop, hbase e play).
+
+ant run
 1. Limpeza dos .classes anteriormente gerados.
-2. Download de todo o material necessario, cerca 287 MB, para o seu computador (hadoop, hbase e play).
-3. Iniciar hbase e criação de tabelas.
+2. Iniciar hbase e criação de tabelas.
 Atenção: O Linux poderá queixar-se por causa das permissões na pasta CN. O ideal é executar chmod 777 -R CN.(Estando no Desktop). 
-4. Geração de .classes
-5. Run do MapReduce
+3. Geração de .classes
+4. Run do MapReduce
 
 Mais info em (build.xml)
 
 Como fazer queries ao sistema?
 
-1. Iniciar webApp, executar play na pasta web.
+1. Executar ./ResoucesApp/play-2.2.0/play na pasta web.
+2. Executar start na consola do play.
 
 query 1 - localhost:9000/1/phoneID/date
 Exemplo:  localhost:9000/1/968281362/12-10-2013
