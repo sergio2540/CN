@@ -44,22 +44,17 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	public void reduce(KeyData key, Iterator<ValueData> value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
 		
 		List<ValueData> sortedVd = new ArrayList<ValueData>();
-
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<reduce time started>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
-
 		
 		while(value.hasNext()){
 			
 			ValueData temp = value.next();
 			
 			ValueData vd = new ValueData(temp.getEventId(), temp.getTime(), temp.getCellId());
-			System.out.println("Family1: " + key.getTypeDistinguisher() + " Cell: " + vd.getCellId() + " Event: " + vd.getEventId() + " Time: " + vd.getTime());
 			sortedVd.add(vd);
 		}
 		
 		Collections.sort(sortedVd);
 		Iterator<ValueData> sortedVdIterator = sortedVd.iterator();
-		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<reduce time finished>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ");
 
 		
 		String typeDistinguisher = key.getTypeDistinguisher();
