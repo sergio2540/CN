@@ -138,8 +138,18 @@
     </target>
 
 	<target name="getResources">
-        	<get dest="./Resources.zip" src="https://dl.dropboxusercontent.com/u/12590235/Resources.zip"/>
+
+
+		<!-- Hadoop + Hbase + Play -->
+      	
+		<get dest="./Resources.zip" src="https://dl.dropboxusercontent.com/u/12590235/Resources.zip"/>
 		<unzip src="Resources.zip" dest="."/>
+	
+
+		<!-- Hbase client libs -->
+		<get dest="./ResourcesWeb.zip" src="https://dl.dropboxusercontent.com/u/12590235/ResourcesWeb.zip"/>
+		<unzip src="ResourcesWeb.zip" dest="web"/>
+
     	</target>
 
     <target name="clean">
