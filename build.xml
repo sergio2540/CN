@@ -132,9 +132,9 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-		<exec executable="/bin/bash">
-		<arg value = "scripts/hbase.sh"/>
-		</exec>
+		<!--<exec executable="/bin/bash">-->
+		<!--<arg value = "scripts/hbase.sh"/>-->
+		<!--</exec>-->
     </target>
 
 	<target name="getResources">
@@ -189,4 +189,9 @@
 		<arg value="start"/>		
 	</exec>
     </target>
+
+	<target name="dist">
+        	<jar destfile="CloudComputing.jar" basedir="bin"/>
+    	</target>
+
 </project>
