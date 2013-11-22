@@ -8,34 +8,41 @@ import views.html.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-//import org.apache.hadoop.hbase.client.Result;
 import java.io.IOException;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.rest.client.Client;
+import org.apache.hadoop.hbase.rest.client.Cluster;
+import org.apache.hadoop.hbase.rest.client.RemoteHTable;
 
 public class Application extends Controller {
 
-    public static Result index() {
+	private static RemoteHTable table;
 
-        return ok(index.render("CN"));
-    
-   }
+	private static void connect(String tableName) throws IOException{
+		
+		Cluster cluster = new Cluster();
+		cluster.add("ec2-54-200-221-239.us-west-2.compute.amazonaws.com", 8080);
+		Client  client = new Client(cluster);
+		table = new RemoteHTable(client, tableName);
+
+	}
+
+	public static Result index() {
+
+		return ok(index.render("CN"));
+	    
+	}
 
     public static Result query1(String phoneID, String date) {
 	
-		String tableName = "Cell";
-	
-		Configuration config = HBaseConfiguration.create();
-	
 		try {
-			
-			String key = phoneID + "_" + date;		
-	
-			HTable table = new HTable(config, tableName);
-			
+			String tableName = "Cell";	
+			connect(tableName);
+
+			String key = phoneID + "_" + date;
 			Get g = new Get(Bytes.toBytes(key));
 	
 			org.apache.hadoop.hbase.client.Result r = table.get(g);
@@ -59,13 +66,11 @@ public class Application extends Controller {
 
     public static Result query2(String cellID, String date, String time) {
     	
-    	String tableName = "phonePresence";
-    	Configuration config = HBaseConfiguration.create();
-    	
     	try {
-    		
+		String tableName = "phonePresence";
+    		connect(tableName);
+
     		String key = cellID + "_" + date + "_" + time;		
-    		HTable table = new HTable(config, tableName);
     		Get g = new Get(Bytes.toBytes(key));
     		org.apache.hadoop.hbase.client.Result r = table.get(g);
     	
@@ -86,22 +91,19 @@ public class Application extends Controller {
     }
     
     public static Result query3(String phoneID, String date) {
-	
-		String tableName = "Cell";
-	
-		Configuration config = HBaseConfiguration.create();
 		
 		try {
-			
+			String tableName = "Cell";
+	    		connect(tableName);
+
 			String key = phoneID + "_" + date;		
 	
-			HTable table = new HTable(config, tableName);
 			Get g = new Get(Bytes.toBytes(key));
 	
 			org.apache.hadoop.hbase.client.Result r = table.get(g);
 			
 			if(r.isEmpty()){
-				return ok("0");
+				return ok("24");
 			}
 		
 			String family = "MO";

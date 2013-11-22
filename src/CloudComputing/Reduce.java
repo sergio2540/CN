@@ -15,6 +15,9 @@ import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.rest.client.Client;
+import org.apache.hadoop.hbase.rest.client.Cluster;
+import org.apache.hadoop.hbase.rest.client.RemoteHTable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -25,14 +28,14 @@ import org.apache.hadoop.mapred.Reporter;
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
 	private HBaseAdmin admin;
-	private HTable table;
-	
+	private RemoteHTable table;
 	public void setup(String tableName) throws IOException{
-		
-		Configuration conf =  HBaseConfiguration.create();
-		this.admin = new HBaseAdmin(conf);
-		this.table = new HTable(conf, tableName);
-		
+
+		Cluster cluster = new Cluster();
+		cluster.add("ec2-54-200-221-239.us-west-2.compute.amazonaws.com", 8080);
+		Client  client = new Client(cluster);
+		this.table = new RemoteHTable(client, tableName);
+
 	}
 	
 	public void cleanUp() throws IOException{
