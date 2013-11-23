@@ -15,9 +15,12 @@ import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.rest.client.Client;
 import org.apache.hadoop.hbase.rest.client.Cluster;
 import org.apache.hadoop.hbase.rest.client.RemoteHTable;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -28,19 +31,30 @@ import org.apache.hadoop.mapred.Reporter;
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
 	private HBaseAdmin admin;
+	//private HTable table;
 	private RemoteHTable table;
 	public void setup(String tableName) throws IOException{
-
+		
+		Configuration conf =  HBaseConfiguration.create();
+		//conf.set("hbase.zookeeper.quorum", "54.200.125.80");
+        //conf.set("hbase.zookeeper.property.clientPort","2181");
+        //conf.set("hbase.regionserver.port", "60030");
+        //conf.set("hbase.regionserver.info.bindAddress", "54.200.125.80");
+		
+		
+		
+		this.admin = new HBaseAdmin(conf);
+		//this.table = new HTable(conf, tableName);
+		
 		Cluster cluster = new Cluster();
-		cluster.add("ec2-54-200-221-239.us-west-2.compute.amazonaws.com", 8080);
+		cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
 		Client  client = new Client(cluster);
 		this.table = new RemoteHTable(client, tableName);
-
 	}
 	
 	public void cleanUp() throws IOException{
 		
-		this.admin.close();
+		//this.admin.close();
 		this.table.close();
 	}
 	
@@ -253,6 +267,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	
 	public void putToTable(String row, String family, String  qualifier, String value) throws Exception{
 				
+		    System.out.println("Value:" + value);
 			Put put = new Put(row.getBytes());
 			put.add(family.getBytes(), qualifier.getBytes(), value.getBytes());
 			this.table.put(put);	
@@ -260,20 +275,57 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	}
 	
 	
-public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+//public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
 
-			List<Append> batch = new ArrayList<Append>();
+			//List<Append> batch = new ArrayList<Append>();
 
-			for(Integer temp : list)
-			{
-				Append append = new Append((row + String.valueOf(temp)).getBytes());
-				append.add(family.getBytes(), qualifier.getBytes(),(value + " ").getBytes());	
-				batch.add(append);
-			}
-			this.table.batch(batch);
+			//for(Integer temp : list)
+			//{
+				//Append append = new Append((row + String.valueOf(temp)).getBytes());
+				//append.add(family.getBytes(), qualifier.getBytes(),(value + " ").getBytes());
+				//this.table.append(append);
+				//batch.add(append);
+			//}
+			//this.table.batch(batch);
 			//check if null
+	//}
+	
+//}
+	
+	
+	public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+
+	for(Integer temp : list)
+	{
+	try	
+ {
+		String rowId = row +  String.valueOf(temp);
+		Result r = null;
+		try{
+		Get get = new Get(Bytes.toBytes(rowId));
+		r = table.get(get);
+		}catch(Exception e){
+			System.out.println("Exception!!!!!");
+		}
+		
+		byte[] data = r.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifier));
+		String stringedData = "";
+		if(data != null){
+		stringedData= new String(data);
+		stringedData += value;
+		putToTable(rowId , family, qualifier, stringedData);
+		
+		}else putToTable(rowId , family, qualifier, value);
+			
+ 
+ 	} catch (Exception e) {
+			System.out.println("e aqui");
+		}
+		
 	}
 	
+	//this.table.batch(batch);
+	//check if null
+	}
 }
-	
 		
