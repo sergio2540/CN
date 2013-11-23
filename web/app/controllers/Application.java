@@ -24,7 +24,7 @@ public class Application extends Controller {
 	private static void connect(String tableName) throws IOException{
 		
 		Cluster cluster = new Cluster();
-		cluster.add("ec2-54-200-221-239.us-west-2.compute.amazonaws.com", 8080);
+		cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
 		Client  client = new Client(cluster);
 		table = new RemoteHTable(client, tableName);
 
