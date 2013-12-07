@@ -7,7 +7,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -31,8 +33,8 @@ import org.apache.hadoop.mapred.Reporter;
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
 	private HBaseAdmin admin;
-	//private HTable table;
-	private RemoteHTable table;
+	private HTable table;
+	//private RemoteHTable table;
 	public void setup(String tableName) throws IOException{
 		
 		Configuration conf =  HBaseConfiguration.create();
@@ -46,15 +48,15 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		this.admin = new HBaseAdmin(conf);
 		//this.table = new HTable(conf, tableName);
 		
-		Cluster cluster = new Cluster();
-		cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
-		Client  client = new Client(cluster);
-		this.table = new RemoteHTable(client, tableName);
+		//Cluster cluster = new Cluster();
+		//cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
+		//Client  client = new Client(cluster);
+		//this.table = new RemoteHTable(client, tableName);
 	}
 	
 	public void cleanUp() throws IOException{
 		
-		//this.admin.close();
+		this.admin.close();
 		this.table.close();
 	}
 	
@@ -81,7 +83,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			String cellSequence = getCellSequence(sortedVdIterator);			
 				try {
 					setup("Cell");
-					putToTable(key.getPhoneId() +"_" +key.getDate() ,"VC", "cellSequence", cellSequence);
+					//putToTable(key.getPhoneId() + "_" + key.getDate() ,"VC", "cellSequence", cellSequence);
+					appendToPhonePresence(Collection<Integer> list ,String row, String family, String  qualifier, String value); 
 					cleanUp();
 				} catch (Exception e) {
 					System.out.println("Error while adding to table Cell, VC family");
@@ -120,6 +123,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 		while(valuesList.hasNext()) {
 			vd = valuesList.next();
+			sequence.append(String.valueOf(vd.getSeconds()));//--------------------
+			sequence.append(":");//-----------------------------------------------
 			sequence.append(vd.getCellId());
 			sequence.append(" ");
 		}
@@ -293,7 +298,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 //}
 	
 	
-	public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+	public void appendToTable(String row, String family, String  qualifier, String value) throws Exception{
 
 	for(Integer temp : list)
 	{
@@ -302,24 +307,28 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		String rowId = row +  String.valueOf(temp);
 		Result r = null;
 		try{
-		Get get = new Get(Bytes.toBytes(rowId));
-		r = table.get(get);
+			Get get = new Get(Bytes.toBytes(rowId));
+			r = table.get(get);
 		}catch(Exception e){
-			System.out.println("Exception!!!!!");
+			System.out.println(e.getMessage());
 		}
 		
 		byte[] data = r.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifier));
 		String stringedData = "";
 		if(data != null){
-		stringedData= new String(data);
+		stringedData = new String(data);
 		stringedData += value;
+		//stringedData = orderChronologically(new String(data), value);
+		//System.out.println("------------------------------>Segunda vez: " + stringedData);
 		putToTable(rowId , family, qualifier, stringedData);
 		
-		}else putToTable(rowId , family, qualifier, value);
-			
+		}else {
+			//System.out.println("------------------------->Primeira vez: " + value);
+			putToTable(rowId , family, qualifier, value);
+		}
  
  	} catch (Exception e) {
-			System.out.println("e aqui");
+			System.out.println(e.getMessage());
 		}
 		
 	}
@@ -327,5 +336,119 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	//this.table.batch(batch);
 	//check if null
 	}
-}
+
+	public String orderChronologically(String onDB, String toDB){
+		
+		String[] onDBbySpace = onDB.split(" ");
+		String[] toDBbySpace = toDB.split(" ");
+		StringBuilder orderedString = new StringBuilder();
+		
+		TreeMap<Integer,String> ordered = new TreeMap<Integer,String>();
+		
+		for(String onDBtemp : onDBbySpace){
+			
+			String[] onDBbyDots = onDBtemp.split(":");
+				ordered.put(Integer.parseInt(onDBbyDots[0]), onDBbyDots[1]);
+		}
+		
+		
+		for(String toDBtemp : toDBbySpace){
+			
+			String[] toDBbyDots = toDBtemp.split(":");
+				ordered.put(Integer.parseInt(toDBbyDots[0]), toDBbyDots[1]);
+		}
+		
+		Set<Entry<Integer,String>> orderedSet = ordered.entrySet();
+		
+		for(Entry entry : orderedSet){
+			
+			orderedString.append(entry.getKey().toString());
+			orderedString.append(":");
+			orderedString.append(entry.getValue());
+			orderedString.append(" ");
+			
+			
+		}
+		
+		return orderedString.toString();
+		
+		/*int value1 = 0;
+		int value2 = 1;
+		int onDBLength = onDBbySpace.length;
+		
+		for(;value2 < onDBLength;){
+			String lowerBoundS = onDBbySpace[value1].split(":")[0];
+			String upperBoundS = onDBbySpace[value2].split(":")[0];
+			int lowerBoundI = Integer.parseInt(lowerBoundS);
+			int upperBoundI = Integer.parseInt(upperBoundS);
+			
+			for(String toDBString : toDBbySpace){
+				
+				String toDBBydots = toDBString.split(":")[0];
+				int toDBSeconds = Integer.parseInt(toDBBydots);
+				if(toDBSeconds > lo)
+				
+				
+			}
+			}
+			*/	
+		
+		
+				
+	}
+	
+	
+
+
+public void appendToPhonePresence(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+	
+	
+	for(Integer temp : list)
+	{
+	try	
+ {
+		String rowId = row +  String.valueOf(temp);
+		Result r = null;
+		try{
+			Get get = new Get(Bytes.toBytes(rowId));
+			r = table.get(get);
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		
+		byte[] data = r.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifier));
+		String stringedData = "";
+		if(data != null){
+		stringedData = new String(data);
+		stringedData += value;
+		stringedData = orderChronologically(new String(data), value);
+		System.out.println("------------------------------>Segunda vez: " + stringedData);
+		putToTable(rowId , family, qualifier, stringedData);
+		
+		}else {
+			System.out.println("------------------------->Primeira vez: " + value);
+			putToTable(rowId , family, qualifier, value);
+		}
+ 
+ 	} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+	}
+	
+	//this.table.batch(batch);
+	//check if null
+	}
+
+		
+		
+				
+	}
+	
+
+
+
+
+		
+
 		
