@@ -42,12 +42,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		//conf.set("hbase.zookeeper.property.clientPort","2181");
 		//conf.set("hbase.regionserver.port", "60030");
 		//conf.set("hbase.regionserver.info.bindAddress", "54.200.125.80");
-
-
-
 		this.admin = new HBaseAdmin(conf);
-		//this.table = new HTable(conf, tableName);
-
+		this.table = new HTable(conf, tableName);
 		//Cluster cluster = new Cluster();
 		//cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
 		//Client  client = new Client(cluster);
@@ -96,7 +92,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 			try {
 				setup("Cell");
-				putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
+				//
+				updateMinutesOff(key.getPhoneId() + "_" +key.getDate(), "MO", "minutesOff", getMinutesOff(sortedVdIterator));
+				//putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
 				cleanUp();
 			} catch (Exception e) {
 				System.out.println("Error while adding to table Cell, MO family");
@@ -106,7 +104,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			Set<Integer> list = getListOfHoursPresent(sortedVdIterator);
 			try {
 				setup("phonePresence");
-				appendToTable(list,key.getCellId() + "_" + key.getDate() + "_" ,"PP", "phoneList", key.getPhoneId() + " ");
+				appendToPhonePresence(list,key.getCellId() + "_" + key.getDate() + "_" ,"PP", "phoneList", key.getPhoneId() + " ");
 				cleanUp();
 			} catch (Exception e) {
 				System.out.println("Error while adding to table phonePresence, PP family");
@@ -261,9 +259,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			}
 		}
 
-		if(vd.getEventId().equals("5")) {
-			secondsOff += 86400 - prevS;
-		}
+		//if(vd.getEventId().equals("5")) {
+			//secondsOff += 86400 - prevS;
+		//}
 
 		return secondsOff;
 
@@ -280,7 +278,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	}
 
 
-	//public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+	//public void appendToPhonePresence(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
 
 	//List<Append> batch = new ArrayList<Append>();
 
@@ -298,7 +296,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 	//}
 
 
-	public void appendToTable(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
+	public void appendToPhonePresence(Collection<Integer> list ,String row, String family, String  qualifier, String value) throws Exception{
 
 		for(Integer temp : list)
 		{
@@ -400,25 +398,30 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 
 
-	public void appendToPhonePresence(String row, String family, String  qualifier, String value) throws Exception{
+	public void appendToPhonePresence(String row, String family, String  qualifier, String value){
 
 		boolean exists = true;
-		try	
-		{
-			String rowId = row;
-			Result r = null;
-			try{
-				Get get = new Get(Bytes.toBytes(rowId));
-				r = table.get(get);
-			}catch(Exception e){
-				System.out.println(e.getMessage());
-				exists = false;
-			}
 
-			byte[] data = null;
-			if(exists)
-			 data = r.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifier));
-			String stringedData = "";
+		String rowId = row;
+		Result r = null;
+		Get get = new Get(Bytes.toBytes(rowId));
+		try {
+
+			if(exists = table.exists(get))
+				r = table.get(get);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		byte[] data = null;
+		if(exists){
+
+			data = r.getValue(Bytes.toBytes(family), Bytes.toBytes(qualifier));
+		}
+
+		String stringedData = null;
+		try{
 			if(data != null){
 				//stringedData = new String(data);
 				//stringedData += value;
@@ -430,15 +433,52 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 				System.out.println("------------------------->Primeira vez: " + value);
 				putToTable(rowId , family, qualifier, value);
 			}
+		}catch(Exception e){
 
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			System.out.println("Exception on putTotable! " + e.getMessage());
 		}
+
 
 	}
 
 	//this.table.batch(batch);
 	//check if null
+
+
+public void updateMinutesOff(String row, String family, String  qualifier, int value) throws Exception
+{
+	
+//putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
+
+	Result r = null;
+	boolean hasOldInfo= false;
+
+	Get get = new Get(Bytes.toBytes(row));
+
+	byte[] data = null;
+
+	if(table.exists(get)) {
+		r = table.get(get);
+		data = r.getValue(Bytes.toBytes("MO"), Bytes.toBytes("minutesOff"));
+		hasOldInfo = true;
+	}
+	String toSend = null;
+	if(hasOldInfo) {
+		System.out.println("---------------------->Has old info: " + data);
+		System.out.println("---------------------->New info: " + value);
+		toSend = String.valueOf(((Integer.parseInt(new String(data))) + value));
+
+	} else {
+		System.out.println("---------------------->Has no old info: " + value);
+		toSend = String.valueOf(value);
+	}
+
+	putToTable(row ,family, qualifier, toSend);	
+
+
+
+}
+
 }
 
 

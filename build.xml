@@ -133,9 +133,16 @@
             </fileset>
         </copy>
 		 <exec executable="/bin/bash">
-		 <arg value = "scripts/hbase.sh"/>
+		 <arg value = "scripts/hbaseStart.sh"/>
 		 </exec>
     </target>
+	
+	
+	<target name="dbReset">
+		<exec executable="/bin/bash">
+				 <arg value = "scripts/hbaseReset.sh"/>
+				 </exec>
+	</target>
 
 	<target name="getResources">
 
