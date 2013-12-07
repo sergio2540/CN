@@ -132,9 +132,9 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-		<!--<exec executable="/bin/bash">-->
-		<!--<arg value = "scripts/hbase.sh"/>-->
-		<!--</exec>-->
+		 <exec executable="/bin/bash">
+		 <arg value = "scripts/hbase.sh"/>
+		 </exec>
     </target>
 
 	<target name="getResources">
@@ -185,9 +185,9 @@
             <arg line="input output"/>
             <classpath refid="CN.classpath"/>
         </java>
-	<exec executable="${javaPlay}" dir="web">
-		<arg value="start"/>		
-	</exec>
+	<!--<exec executable="${javaPlay}" dir="web">-->
+		<!--<arg value="start"/>-->		
+	<!--</exec>-->
     </target>
 
 	<target name="dist">
