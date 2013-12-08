@@ -132,9 +132,9 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-		 <exec executable="/bin/bash">
-		 <arg value = "scripts/hbaseStart.sh"/>
-		 </exec>
+		 <!--<exec executable="/bin/bash">-->
+		 <!--<arg value = "scripts/hbaseStart.sh"/>-->
+		 <!--</exec>-->
     </target>
 	
 	
