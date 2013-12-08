@@ -71,7 +71,6 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		Collections.sort(sortedVd);
 		Iterator<ValueData> sortedVdIterator = sortedVd.iterator();
 
-
 		String typeDistinguisher = key.getTypeDistinguisher();
 		//addToTable(String tableName, String row, String family, String  qualifier, String value)
 		if(typeDistinguisher.equals("VC")){
@@ -92,10 +91,73 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 			try {
 				setup("Cell");
-				//
-				updateMinutesOff(key.getPhoneId() + "_" +key.getDate(), "MO", "minutesOff", getMinutesOff(sortedVdIterator));
-				//putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
+
+				//(event4:time event5:time)
+				//new String(data);
+				StringBuilder string = new StringBuilder();
+				
+				for(ValueData vd : sortedVd) {
+					string.append(vd.getEventId());
+					string.append(":");
+					string.append(vd.getMinutes());
+					string.append(" ");
+				}
+				
+				String vdOnString = string.toString();
+				
+				Get get = new Get(Bytes.toBytes("ES"));
+				boolean exists = false;
+				Result r = null;
+				String row = key.getPhoneId() + "_" + key.getDate();
+				
+				try {
+					
+					if(exists = table.exists(get))
+					r = table.get(get);
+					
+				} catch (IOException e1) {
+					System.out.println(e1.getMessage());
+				}
+
+				byte[] data = null;
+				String dataString = null;
+				
+				if(exists){
+					
+					data = r.getValue(Bytes.toBytes("ES"), Bytes.toBytes("eventSequence"));
+					dataString = new String(data);
+					String orderedString = orderChronologically(dataString, vdOnString);
+
+					List<ValueData> vd = new ArrayList<ValueData>();
+					
+					ValueData valueData = new ValueData();
+					
+					String[] parseValueData = orderedString.split(" ");
+					String[] parseValueDataFields;
+					
+					for(int i = 0; i < parseValueData.length; i++) {
+		
+						parseValueDataFields = parseValueData[i].split(":");
+						
+						if(parseValueDataFields[0] != null && parseValueDataFields[1] != null) {
+							valueData = new ValueData(parseValueDataFields[0], parseValueDataFields[1]);
+							vd.add(valueData);
+						}
+						
+					}
+					
+					putToTable(row, "MO", "minutesOff", String.valueOf(getMinutesOff(vd.iterator())));
+					putToTable(row, "ES", "eventSequence", orderedString);
+					
+				} else {
+					
+					putToTable(row, "MO", "minutesOff", String.valueOf(sortedVd.iterator()));
+					putToTable(row, "ES", "eventSequence", vdOnString);
+					
+				}
+				
 				cleanUp();
+				
 			} catch (Exception e) {
 				System.out.println("Error while adding to table Cell, MO family");
 				System.out.println("Message: " + e.getMessage());
@@ -233,7 +295,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 		return getSecondsOff(valuesList) / 60;
 	}
 
-	public int getSecondsOff(Iterator<ValueData> valuesList){
+	public int getSecondsOff(Iterator<ValueData> valuesList) {
 
 		if(!valuesList.hasNext())
 			return 0;
@@ -249,12 +311,12 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 			newS = vd.getSeconds();
 
-			if(vd.getEventId().equals("4")){
+			if(vd.getEventId().equals("4")) {
 				secondsOff += (newS - prevS);
 				prevS = newS;			
-			} else if(vd.getEventId().equals("5")){
+			} else if (vd.getEventId().equals("5")) {
 				prevS = newS;
-			} else if(vd.getEventId().equals("8"))  {
+			} else if (vd.getEventId().equals("8"))  {
 				continue;
 			}
 		}
@@ -304,10 +366,10 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			{
 				String rowId = row +  String.valueOf(temp);
 				Result r = null;
-				try{
+				try {
 					Get get = new Get(Bytes.toBytes(rowId));
 					r = table.get(get);
-				}catch(Exception e){
+				} catch(Exception e){
 					System.out.println(e.getMessage());
 				}
 
@@ -320,7 +382,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 					//System.out.println("------------------------------>Segunda vez: " + stringedData);
 					putToTable(rowId , family, qualifier, stringedData);
 
-				}else {
+				} else {
 					//System.out.println("------------------------->Primeira vez: " + value);
 					putToTable(rowId , family, qualifier, value);
 				}
@@ -365,6 +427,8 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			orderedString.append(entry.getValue());
 			orderedString.append(" ");
 
+			
+			
 
 		}
 
@@ -394,9 +458,6 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 
 	}
-
-
-
 
 	public void appendToPhonePresence(String row, String family, String  qualifier, String value){
 
@@ -429,7 +490,7 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 				System.out.println("------------------------------>Segunda vez: " + stringedData);
 				putToTable(rowId , family, qualifier, stringedData);
 
-			}else {
+			} else {
 				System.out.println("------------------------->Primeira vez: " + value);
 				putToTable(rowId , family, qualifier, value);
 			}
@@ -443,41 +504,36 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 	//this.table.batch(batch);
 	//check if null
-
-
-public void updateMinutesOff(String row, String family, String  qualifier, int value) throws Exception
-{
+	public void updateMinutesOff(String row, String family, String  qualifier, int value) throws Exception {
+		
+	//putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
 	
-//putToTable(key.getPhoneId() + "_" +key.getDate() ,"MO", "minutesOff", String.valueOf(getMinutesOff(sortedVdIterator)));
-
-	Result r = null;
-	boolean hasOldInfo= false;
-
-	Get get = new Get(Bytes.toBytes(row));
-
-	byte[] data = null;
-
-	if(table.exists(get)) {
-		r = table.get(get);
-		data = r.getValue(Bytes.toBytes("MO"), Bytes.toBytes("minutesOff"));
-		hasOldInfo = true;
+		Result r = null;
+		boolean hasOldInfo= false;
+	
+		Get get = new Get(Bytes.toBytes(row));
+	
+		byte[] data = null;
+	
+		if(table.exists(get)) {
+			r = table.get(get);
+			data = r.getValue(Bytes.toBytes("MO"), Bytes.toBytes("minutesOff"));
+			hasOldInfo = true;
+		}
+		String toSend = null;
+		if(hasOldInfo) {
+			System.out.println("---------------------->Has old info: " + data);
+			System.out.println("---------------------->New info: " + value);
+			toSend = String.valueOf(((Integer.parseInt(new String(data))) + value));
+	
+		} else {
+			System.out.println("---------------------->Has no old info: " + value);
+			toSend = String.valueOf(value);
+		}
+	
+		putToTable(row ,family, qualifier, toSend);	
+	
 	}
-	String toSend = null;
-	if(hasOldInfo) {
-		System.out.println("---------------------->Has old info: " + data);
-		System.out.println("---------------------->New info: " + value);
-		toSend = String.valueOf(((Integer.parseInt(new String(data))) + value));
-
-	} else {
-		System.out.println("---------------------->Has no old info: " + value);
-		toSend = String.valueOf(value);
-	}
-
-	putToTable(row ,family, qualifier, toSend);	
-
-
-
-}
 
 }
 

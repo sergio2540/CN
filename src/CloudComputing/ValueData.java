@@ -24,6 +24,11 @@ public class ValueData implements Writable, Comparable<ValueData> {
 		this.time = time;
 		this.cellId = cellId;
 	}
+    
+    public ValueData(String eventId, String time) {
+    	this.eventId = eventId;
+		this.time = time;
+    }
 	
 	public String getEventId(){return eventId;}
 	public String getTime(){return time;}
