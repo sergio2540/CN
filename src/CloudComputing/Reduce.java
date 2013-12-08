@@ -33,21 +33,24 @@ import org.apache.hadoop.mapred.Reporter;
 public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData, LongWritable, Text> {
 
 	private HBaseAdmin admin;
-	private HTable table;
-	//private RemoteHTable table;
+	//private HTable table;
+	private RemoteHTable table;
 	public void setup(String tableName) throws IOException{
 
+		//54.194.23.170
 		Configuration conf =  HBaseConfiguration.create();
-		//conf.set("hbase.zookeeper.quorum", "54.200.125.80");
-		//conf.set("hbase.zookeeper.property.clientPort","2181");
-		//conf.set("hbase.regionserver.port", "60030");
-		//conf.set("hbase.regionserver.info.bindAddress", "54.200.125.80");
+		conf.set("hbase.zookeeper.quorum", "54.194.23.170");
+		conf.set("hbase.zookeeper.property.clientPort","2181");
+		conf.set("hbase.regionserver.port", "60030");
+		conf.set("hbase.regionserver.info.bindAddress", "54.194.23.170");
+		
 		this.admin = new HBaseAdmin(conf);
-		this.table = new HTable(conf, tableName);
-		//Cluster cluster = new Cluster();
-		//cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
-		//Client  client = new Client(cluster);
-		//this.table = new RemoteHTable(client, tableName);
+		//this.table = new HTable(conf, tableName);
+		
+		Cluster cluster = new Cluster();
+		cluster.add("ec2-54-194-23-170.eu-west-1.compute.amazonaws.com", 8080);
+		Client  client = new Client(cluster);
+		this.table = new RemoteHTable(client, tableName);
 	}
 
 	public void cleanUp() throws IOException{
