@@ -17,9 +17,8 @@ public class MainFilter {
 	public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 
 		TableBuilder builder = new TableBuilder();
-		builder.cleanDB();
-		System.out.println("CLEAN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		builder.setDB();
+		//builder.cleanDB();
+		//builder.setDB();
 		JobConf conf = new JobConf(MainFilter.class);
 		conf.setJobName("Filter");
 		

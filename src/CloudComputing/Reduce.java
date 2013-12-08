@@ -97,40 +97,46 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 				StringBuilder string = new StringBuilder();
 				
 				for(ValueData vd : sortedVd) {
-					string.append(vd.getEventId());
+					string.append(vd.getSeconds());
 					string.append(":");
-					string.append(vd.getMinutes());
+					string.append(vd.getEventId());
 					string.append(" ");
 				}
-				
+				System.out.println("Passou o stringbuilder--------------------------------------");
 				String vdOnString = string.toString();
-				
-				Get get = new Get(Bytes.toBytes("ES"));
+
+				String row = key.getPhoneId() + "_" + key.getDate();
+				Get get = new Get(Bytes.toBytes(row));
 				boolean exists = false;
 				Result r = null;
-				String row = key.getPhoneId() + "_" + key.getDate();
-				
+				System.out.println("Antes do try table exists-------------------------------------------");
+
 				try {
 					
-					if(exists = table.exists(get))
-					r = table.get(get);
+					exists = table.exists(get);
+					if(exists)
+					 r = table.get(get);
 					
 				} catch (IOException e1) {
-					System.out.println(e1.getMessage());
+					System.out.println("Erro ao verificar existencia de entrada em minutes off: " + e1.getMessage());
 				}
 
 				byte[] data = null;
 				String dataString = null;
-				
+				System.out.println("Antes do if exists--------------------------------------");
+
 				if(exists){
 					
 					data = r.getValue(Bytes.toBytes("ES"), Bytes.toBytes("eventSequence"));
+					System.out.println("Exists old minutsoff: .------------____>" + new String(data));
 					dataString = new String(data);
 					String orderedString = orderChronologically(dataString, vdOnString);
+					
+					System.out.println("orderedString---------------> " + orderedString);
 
 					List<ValueData> vd = new ArrayList<ValueData>();
 					
-					ValueData valueData = new ValueData();
+					ValueData valueData = null;
 					
 					String[] parseValueData = orderedString.split(" ");
 					String[] parseValueDataFields;
@@ -140,8 +146,10 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 						parseValueDataFields = parseValueData[i].split(":");
 						
 						if(parseValueDataFields[0] != null && parseValueDataFields[1] != null) {
-							valueData = new ValueData(parseValueDataFields[0], parseValueDataFields[1]);
+							valueData = new ValueData(parseValueDataFields[1], formatIntoHHMMSS(Integer.parseInt(parseValueDataFields[0])));
 							vd.add(valueData);
+						} else {
+							System.out.println("NULLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
 						}
 						
 					}
@@ -151,9 +159,11 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 					
 				} else {
 					
-					putToTable(row, "MO", "minutesOff", String.valueOf(sortedVd.iterator()));
+					System.out.println("There are no minutes off!!!!!!!!!!!!!!!!!");
+					putToTable(row, "MO", "minutesOff", String.valueOf(getMinutesOff(sortedVd.iterator())));
 					putToTable(row, "ES", "eventSequence", vdOnString);
-					
+				
+					//putToTable(String row, String family, String  qualifier, String value)
 				}
 				
 				cleanUp();
@@ -175,6 +185,20 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 
 		}
 	}
+	
+	public String formatIntoHHMMSS(int secsIn)
+	{
+
+	int hours = secsIn / 3600,
+	remainder = secsIn % 3600,
+	minutes = remainder / 60,
+	seconds = remainder % 60;
+
+	return ( (hours < 10 ? "0" : "") + hours
+	+ ":" + (minutes < 10 ? "0" : "") + minutes
+	+ ":" + (seconds< 10 ? "0" : "") + seconds);
+
+	} 
 
 	public String getCellSequence(Iterator<ValueData> valuesList){
 
@@ -321,9 +345,9 @@ public class Reduce extends MapReduceBase implements Reducer<KeyData, ValueData,
 			}
 		}
 
-		//if(vd.getEventId().equals("5")) {
-			//secondsOff += 86400 - prevS;
-		//}
+		if(vd.getEventId().equals("5")) {
+			secondsOff += 86400 - prevS;
+		}
 
 		return secondsOff;
 

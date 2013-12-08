@@ -13,9 +13,8 @@ export EC2_REGION="eu-west-1"
 as-delete-auto-scaling-group PlayGroup --force-delete
 as-delete-launch-config --region eu-west-1 --launch-config playConfig
 as-create-launch-config playConfig --image-id ami-d4d539a3 --instance-type t1.micro --group "Play" --user-data-file ./start_play.sh #--aws-credential-file ./credentials
-as-create-auto-scaling-group PlayGroup --launch-configuration playConfig  --availability-zones eu-west-1a eu-west-1b --min-size 2 --max-size 4 --desired-capacity 2 --load-balancers PlayLoadBalancer
 as-delete-auto-scaling-group PlayGroup
-as-create-auto-scaling-group PlayGroup --launch-configuration playConfig  --availability-zones eu-west-1a eu-west-1b --min-size 0 --max-size 0 --desired-capacity 0 --load-balancers PlayLoadBalancer
+as-create-auto-scaling-group PlayGroup --launch-configuration playConfig  --availability-zones eu-west-1a eu-west-1b --min-size 2 --max-size 4 --desired-capacity 2 --load-balancers PlayLoadBalancer
 #ec2-describe-availability-zones --region eu-west-1
 up=$(as-put-scaling-policy UpScalingPolicy --auto-scaling-group PlayGroup --adjustment=1 --type ChangeInCapacity) 
 #--cooldown  ?? ##ver metricas aumenta em 30.cooldown de 300 segundos por defeito

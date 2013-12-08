@@ -17,6 +17,7 @@ public class TableBuilder {
 	private String table1 = "Cell"; 
 	private String table1VC = "VC";
 	private String table1MO = "MO";
+	private String table1ES = "ES";
 	private String table2 = "phonePresence";
 	private String table2PP = "PP";
 
@@ -61,12 +62,14 @@ public class TableBuilder {
 		HTableDescriptor tab1Desc = new HTableDescriptor(table1);
 		HColumnDescriptor tab1ColFamDesc1 = new HColumnDescriptor(table1VC);
 		HColumnDescriptor tab1ColFamDesc2 = new HColumnDescriptor(table1MO);
+		HColumnDescriptor tab1ColFamDesc3 = new HColumnDescriptor(table1ES);
 		HTableDescriptor tab2Desc = new HTableDescriptor(table2);
 		HColumnDescriptor tab2ColFamDesc1 = new HColumnDescriptor(table2PP);
 		this.admin.createTable(tab1Desc);
 		this.admin.disableTable(table1);
 		this.admin.addColumn(table1, tab1ColFamDesc1);
 		this.admin.addColumn(table1, tab1ColFamDesc2);
+		this.admin.addColumn(table1, tab1ColFamDesc3);
 		this.admin.enableTable(table1);
 		this.admin.createTable(tab2Desc);
 		this.admin.disableTable(table2);
